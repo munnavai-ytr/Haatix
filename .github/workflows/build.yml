@@ -1,4 +1,4 @@
-name: Build AirTouch Debug APK
+name: Build Haatix Debug APK
 
 on:
   push:
@@ -20,11 +20,27 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
 
-      - name: Download MediaPipe Hand Landmarker Model
+      - name: Download MediaPipe Hand Landmarker Model (only if missing)
         run: |
           mkdir -p app/src/main/assets
-          curl -L -o app/src/main/assets/hand_landmarker.task https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task
+          if [ ! -s app/src/main/assets/hand_landmarker.task ]; then
+            curl -L -o app/src/main/assets/hand_landmarker.task https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task
+          fi
           ls -lh app/src/main/assets/hand_landmarker.task
+
+      - name: Generate debug keystore
+        run: |
+          # build.gradle.kts expects ${rootDir}/debug.keystore (it is gitignored, so it must be created in CI)
+          if [ ! -f debug.keystore ]; then
+            keytool -genkeypair -v \
+              -keystore debug.keystore \
+              -storepass android \
+              -alias androiddebugkey \
+              -keypass android \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US"
+          fi
+          ls -l debug.keystore
 
       - name: Make Gradle wrapper executable
         run: chmod +x gradlew
@@ -35,6 +51,6 @@ jobs:
       - name: Upload Debug APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AirTouch-debug-apk
+          name: Haatix-debug-apk
           path: app/build/outputs/apk/debug/*.apk
           retention-days: 14
