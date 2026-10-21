@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">AirTouch</string>
+    <string name="accessibility_service_description">AirTouch uses accessibility gestures exclusively to perform taps, scrolls, and back actions triggered by your hand gestures. No screen content is ever read or stored.</string>
+    <string name="notification_channel_name">AirTouch Gesture Tracking</string>
+    <string name="notification_channel_desc">Active foreground service for AI hand gesture detection</string>
+    <string name="notification_title">AirTouch is Active</string>
+    <string name="notification_text">Hand gesture tracking is running via front camera</string>
+    <string name="action_stop">Stop</string>
+</resources>
