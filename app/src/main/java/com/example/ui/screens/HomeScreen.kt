@@ -9,6 +9,7 @@ import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -34,19 +35,21 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AccessibilityNew
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Security
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -56,7 +59,6 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
@@ -68,7 +70,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -78,7 +79,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -90,8 +90,10 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.example.data.AirTouchSettings
+import com.example.data.HaatixSettings
+import com.example.data.PerformanceMode
 import com.example.data.SettingsManager
+import com.example.overlay.CursorMode
 import com.example.service.AirTouchAccessibilityService
 import com.example.service.GestureService
 import com.example.ui.theme.DarkNavyBackground
@@ -109,6 +111,7 @@ import com.example.ui.theme.TextSecondary
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    onNavigateToPractice: () -> Unit,
     onNavigateToGuide: () -> Unit,
     onNavigateToPrivacy: () -> Unit
 ) {
@@ -118,10 +121,9 @@ fun HomeScreen(
     val settings by settingsManager.settings.collectAsState()
 
     val isServiceRunning by GestureService.isServiceRunning.collectAsState()
-    val engineState by GestureService.engineStateFlow.collectAsState()
+    val uiState by GestureService.uiStateFlow.collectAsState()
     val isAccessibilityConnected by AirTouchAccessibilityService.isConnected.collectAsState()
 
-    // Permission states checked reactively on resume
     var hasCameraPermission by remember { mutableStateOf(false) }
     var hasOverlayPermission by remember { mutableStateOf(false) }
     var hasNotificationPermission by remember { mutableStateOf(false) }
@@ -184,7 +186,7 @@ fun HomeScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "AirTouch V1",
+                            text = "Haatix V2",
                             fontWeight = FontWeight.ExtraBold,
                             color = TextPrimary,
                             letterSpacing = 1.sp
@@ -193,11 +195,21 @@ fun HomeScreen(
                 },
                 actions = {
                     IconButton(
+                        onClick = onNavigateToPractice,
+                        modifier = Modifier.testTag("practice_button")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.School,
+                            contentDescription = "Practice Mode",
+                            tint = NeonTeal
+                        )
+                    }
+                    IconButton(
                         onClick = onNavigateToGuide,
                         modifier = Modifier.testTag("guide_button")
                     ) {
                         Icon(
-                            imageVector = Icons.Default.MenuBook,
+                            imageVector = Icons.AutoMirrored.Filled.MenuBook,
                             contentDescription = "User Guide",
                             tint = NeonCyan
                         )
@@ -209,7 +221,7 @@ fun HomeScreen(
                         Icon(
                             imageVector = Icons.Default.Security,
                             contentDescription = "Privacy Policy",
-                            tint = NeonTeal
+                            tint = TextSecondary
                         )
                     }
                 },
@@ -230,7 +242,7 @@ fun HomeScreen(
                 Spacer(modifier = Modifier.height(4.dp))
                 LiveStatusCard(
                     isRunning = isServiceRunning,
-                    engineState = engineState
+                    uiState = uiState
                 )
             }
 
@@ -249,6 +261,11 @@ fun HomeScreen(
                         }
                     }
                 )
+            }
+
+            // Practice Mode Quick Action Banner
+            item {
+                PracticeActionCard(onNavigateToPractice = onNavigateToPractice)
             }
 
             // Setup Checklist
@@ -288,15 +305,15 @@ fun HomeScreen(
                 )
             }
 
-            // Gestures & Tuning Settings
+            // Easy Settings & Calibration
             item {
-                SettingsCard(
+                EasySettingsCard(
                     settings = settings,
                     settingsManager = settingsManager
                 )
             }
 
-            // Warmth Warning / Battery note
+            // Temperature / Efficiency Note
             item {
                 SafetyNoteCard()
             }
@@ -311,7 +328,7 @@ fun HomeScreen(
 @Composable
 private fun LiveStatusCard(
     isRunning: Boolean,
-    engineState: com.example.engine.EngineState
+    uiState: com.example.service.HaatixUiState
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
     val pulseScale by infiniteTransition.animateFloat(
@@ -363,26 +380,38 @@ private fun LiveStatusCard(
             Spacer(modifier = Modifier.width(16.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = if (isRunning) "AIRTOUCH ACTIVE" else "AIRTOUCH STOPPED",
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 15.sp,
-                    color = if (isRunning) NeonCyan else TextSecondary,
-                    letterSpacing = 0.8.sp
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = if (isRunning) "HAATIX ACTIVE" else "HAATIX STOPPED",
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 15.sp,
+                        color = if (isRunning) NeonCyan else TextSecondary,
+                        letterSpacing = 0.8.sp
+                    )
+                    if (isRunning && uiState.hasHand) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "${uiState.fps} FPS · ${uiState.latencyMs}ms",
+                            fontSize = 11.sp,
+                            color = NeonTeal,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
                 Spacer(modifier = Modifier.height(4.dp))
                 val subText = when {
                     !isRunning -> "Service idle. Complete checklist below and press Start."
-                    !engineState.isHandDetected -> "Scanning front camera... (Put hand in frame)"
-                    engineState.isPaused -> "Paused (Hold open palm still 2s to resume)"
-                    engineState.isPinching -> "Pinch Detected (Click triggered)"
-                    engineState.isFist -> "Fist Detected (Holding for Back...)"
-                    else -> "Hand tracking active & smooth"
+                    !uiState.hasHand -> "Scanning front camera... (Put hand in frame)"
+                    uiState.isPaused -> "Paused (Hold fist 1.5s to resume)"
+                    uiState.mode == CursorMode.PINCH_READY -> "Click Ready (Release to tap)"
+                    uiState.mode == CursorMode.DRAGGING -> "Dragging / Touching screen"
+                    uiState.mode == CursorMode.SCROLL -> "Two-Finger Continuous Scroll active"
+                    else -> "Hand tracking active & responsive"
                 }
                 Text(
                     text = subText,
                     fontSize = 12.5.sp,
-                    color = if (isRunning && engineState.isHandDetected) NeonTeal else TextSecondary,
+                    color = if (isRunning && uiState.hasHand) NeonTeal else TextSecondary,
                     lineHeight = 17.sp
                 )
             }
@@ -421,12 +450,59 @@ private fun StartStopButton(
             )
             Spacer(modifier = Modifier.width(10.dp))
             Text(
-                text = if (isRunning) "STOP AIRTOUCH SERVICE" else if (canStart) "START AIRTOUCH" else "PERMISSIONS REQUIRED FIRST",
+                text = if (isRunning) "STOP HAATIX SERVICE" else if (canStart) "START HAATIX" else "PERMISSIONS REQUIRED FIRST",
                 fontWeight = FontWeight.Bold,
                 fontSize = 15.sp,
                 color = if (isRunning) Color.White else if (canStart) Color(0xFF00363D) else TextMuted,
                 letterSpacing = 0.6.sp
             )
+        }
+    }
+}
+
+@Composable
+private fun PracticeActionCard(onNavigateToPractice: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onNavigateToPractice() }
+            .border(1.dp, NeonTeal.copy(alpha = 0.6f), RoundedCornerShape(16.dp)),
+        colors = CardDefaults.cardColors(containerColor = DarkNavySurface),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(42.dp)
+                    .clip(CircleShape)
+                    .background(NeonTeal.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.School,
+                    contentDescription = null,
+                    tint = NeonTeal,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Practice Mode (হাত দিয়ে প্র্যাকটিস করুন)",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.5.sp,
+                    color = NeonTeal
+                )
+                Text(
+                    text = "Try tapping targets, scrolling lists & swiping pages in 2 minutes.",
+                    fontSize = 12.sp,
+                    color = TextSecondary
+                )
+            }
+            Text("Try →", fontWeight = FontWeight.Bold, color = NeonTeal, fontSize = 13.sp)
         }
     }
 }
@@ -451,21 +527,21 @@ private fun SetupChecklistCard(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = "Setup Checklist (প্রয়োজনীয় অনুমতি)",
+                text = "Setup Checklist (অনুমতি সেটআপ)",
                 fontWeight = FontWeight.Bold,
                 fontSize = 15.sp,
                 color = TextPrimary
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "AirTouch requires the following system permissions to work completely on-device.",
+                text = "Haatix requires the following permissions to track hands and dispatch touch gestures.",
                 fontSize = 12.sp,
                 color = TextSecondary
             )
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // 1. Camera
+            // Camera
             ChecklistItem(
                 title = "Front Camera Access",
                 description = "Used strictly on-device to track hand landmarks",
@@ -478,7 +554,7 @@ private fun SetupChecklistCard(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // 2. Overlay
+            // Overlay
             ChecklistItem(
                 title = "Draw Over Other Apps",
                 description = "Displays the holographic cyan ring cursor on top",
@@ -491,10 +567,10 @@ private fun SetupChecklistCard(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // 3. Accessibility
+            // Accessibility
             ChecklistItem(
-                title = "AirTouch Accessibility Service",
-                description = "Dispatches taps, scrolls & back actions (no screen reading)",
+                title = "Haatix Accessibility Service",
+                description = "Dispatches taps, drags, scrolls & back (no screen reading)",
                 isGranted = hasAccessibility,
                 icon = Icons.Default.AccessibilityNew,
                 buttonLabel = "Turn On",
@@ -505,7 +581,7 @@ private fun SetupChecklistCard(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // 4. Notifications
+                // Notification
                 ChecklistItem(
                     title = "Foreground Notification",
                     description = "Required to keep the camera service active & stop easily",
@@ -573,9 +649,7 @@ private fun ChecklistItem(
                 onClick = onClick,
                 modifier = Modifier.testTag(testTag),
                 shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = NeonCyan
-                )
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = NeonCyan)
             ) {
                 Text(text = buttonLabel, fontSize = 12.sp, fontWeight = FontWeight.Bold)
             }
@@ -610,7 +684,7 @@ private fun KeepScreenOnCard(
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = "Prevents display timeout even outside the app via an invisible overlay.",
+                    text = "Maintains display awake via an invisible overlay even outside the app.",
                     fontSize = 12.sp,
                     color = TextSecondary
                 )
@@ -630,10 +704,12 @@ private fun KeepScreenOnCard(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SettingsCard(
-    settings: AirTouchSettings,
+private fun EasySettingsCard(
+    settings: HaatixSettings,
     settingsManager: SettingsManager
 ) {
+    var isAdvancedExpanded by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -651,7 +727,7 @@ private fun SettingsCard(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Gestures & Sensitivity Settings",
+                    text = "Easy Settings (সহজ সেটিংস)",
                     fontWeight = FontWeight.Bold,
                     fontSize = 15.sp,
                     color = TextPrimary
@@ -660,57 +736,71 @@ private fun SettingsCard(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Sensitivity Slider
+            // Cursor Speed
             Text(
-                text = "Cursor Sensitivity: ${String.format("%.1fx", settings.sensitivity)}",
+                text = "Cursor Speed: ${String.format("%.2fx", settings.cursorSpeed)}",
                 fontSize = 13.sp,
                 color = TextSecondary
             )
             Slider(
-                value = settings.sensitivity,
-                onValueChange = { settingsManager.updateSensitivity(it) },
-                valueRange = 0.6f..2.4f,
-                steps = 8,
-                colors = SliderDefaults.colors(
-                    thumbColor = NeonCyan,
-                    activeTrackColor = NeonCyan
-                )
+                value = settings.cursorSpeed,
+                onValueChange = { settingsManager.updateCursorSpeed(it) },
+                valueRange = 0.8f..2.0f,
+                steps = 11,
+                colors = SliderDefaults.colors(thumbColor = NeonCyan, activeTrackColor = NeonCyan)
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
-            // Smoothing Slider
+            // Smoothness (One Euro Filter)
             Text(
-                text = "Cursor Smoothing: ${if (settings.smoothing > 0.5f) "Fast / Responsive" else "Smooth / Stable"}",
+                text = "Smoothness: ${if (settings.smoothness > 0.65f) "Ultra Smooth" else if (settings.smoothness < 0.35f) "Instant Response" else "Balanced (Recommended)"}",
                 fontSize = 13.sp,
                 color = TextSecondary
             )
             Slider(
-                value = settings.smoothing,
-                onValueChange = { settingsManager.updateSmoothing(it) },
-                valueRange = 0.15f..0.75f,
-                steps = 5,
-                colors = SliderDefaults.colors(
-                    thumbColor = NeonTeal,
-                    activeTrackColor = NeonTeal
-                )
+                value = settings.smoothness,
+                onValueChange = { settingsManager.updateSmoothness(it) },
+                valueRange = 0.0f..1.0f,
+                steps = 9,
+                colors = SliderDefaults.colors(thumbColor = NeonTeal, activeTrackColor = NeonTeal)
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
-            // Target FPS Chips
+            // Scroll Speed
             Text(
-                text = "Camera Frame Rate (Target FPS)",
+                text = "Scroll Speed: ${String.format("%.1fx", settings.scrollSpeed)}",
+                fontSize = 13.sp,
+                color = TextSecondary
+            )
+            Slider(
+                value = settings.scrollSpeed,
+                onValueChange = { settingsManager.updateScrollSpeed(it) },
+                valueRange = 0.5f..2.0f,
+                steps = 6,
+                colors = SliderDefaults.colors(thumbColor = NeonCyan, activeTrackColor = NeonCyan)
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Performance Mode Chips
+            Text(
+                text = "Performance Mode (কর্মক্ষমতা)",
                 fontSize = 13.sp,
                 color = TextSecondary
             )
             Spacer(modifier = Modifier.height(6.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf(15, 20, 30).forEach { fps ->
+                listOf(
+                    PerformanceMode.AUTO to "Auto",
+                    PerformanceMode.HIGH to "High (30 FPS)",
+                    PerformanceMode.POWER_SAVER to "Power Saver (15 FPS)"
+                ).forEach { (mode, label) ->
                     FilterChip(
-                        selected = settings.targetFps == fps,
-                        onClick = { settingsManager.updateTargetFps(fps) },
-                        label = { Text("$fps FPS", fontSize = 12.sp) },
+                        selected = settings.performanceMode == mode,
+                        onClick = { settingsManager.updatePerformanceMode(mode) },
+                        label = { Text(label, fontSize = 12.sp) },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = NeonCyan.copy(alpha = 0.25f),
                             selectedLabelColor = NeonCyan
@@ -719,33 +809,113 @@ private fun SettingsCard(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // Behavior Toggles
+            SettingToggleRow("Reverse scroll direction", settings.reverseScroll) {
+                settingsManager.updateReverseScroll(it)
+            }
+            SettingToggleRow("Dwell click (hold still 1.0s to tap)", settings.dwellClick) {
+                settingsManager.updateDwellClick(it)
+            }
+            SettingToggleRow("Haptic vibrations", settings.haptics) {
+                settingsManager.updateHaptics(it)
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Individual Gesture switches
             Text(
-                text = "Active Gestures Toggle",
+                text = "Gesture Toggles",
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 13.sp,
                 color = TextPrimary
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
-            GestureToggleRow("Pinch to Tap", settings.pinchTapEnabled) {
-                settingsManager.updatePinchTapEnabled(it)
+            SettingToggleRow("Pinch Click & Drag", settings.pinchClickEnabled) {
+                settingsManager.updatePinchClickEnabled(it)
             }
-            GestureToggleRow("Palm Swipe to Scroll", settings.swipeScrollEnabled) {
-                settingsManager.updateSwipeScrollEnabled(it)
+            SettingToggleRow("Wave Flick Scroll (Open Palm)", settings.flickScrollEnabled) {
+                settingsManager.updateFlickScrollEnabled(it)
             }
-            GestureToggleRow("Fist (0.7s) to Back", settings.fistBackEnabled) {
+            SettingToggleRow("Two-Finger Continuous Scroll (V-Sign)", settings.vScrollEnabled) {
+                settingsManager.updateVScrollEnabled(it)
+            }
+            SettingToggleRow("Fist (0.5s) to Back", settings.fistBackEnabled) {
                 settingsManager.updateFistBackEnabled(it)
             }
-            GestureToggleRow("Hold Still (2s) to Pause", settings.pauseResumeEnabled) {
-                settingsManager.updatePauseResumeEnabled(it)
+            SettingToggleRow("Fist (1.5s) to Pause/Resume", settings.pauseEnabled) {
+                settingsManager.updatePauseEnabled(it)
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Collapsed Advanced Calibration Section
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { isAdvancedExpanded = !isAdvancedExpanded }
+                    .padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Advanced / Calibration (ক্যালিব্রেশন)",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.5.sp,
+                    color = NeonTeal,
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(
+                    imageVector = if (isAdvancedExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                    contentDescription = null,
+                    tint = NeonTeal
+                )
+            }
+
+            AnimatedVisibility(visible = isAdvancedExpanded) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(DarkNavySurface)
+                        .padding(12.dp)
+                ) {
+                    Text(
+                        text = "Offset X (Horizontal calibration): ${settings.offsetX} px",
+                        fontSize = 12.sp,
+                        color = TextSecondary
+                    )
+                    Slider(
+                        value = settings.offsetX.toFloat(),
+                        onValueChange = { settingsManager.updateOffsetX(it.toInt()) },
+                        valueRange = -80f..80f,
+                        steps = 15,
+                        colors = SliderDefaults.colors(thumbColor = NeonCyan, activeTrackColor = NeonCyan)
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = "Offset Y (Vertical calibration): ${settings.offsetY} px",
+                        fontSize = 12.sp,
+                        color = TextSecondary
+                    )
+                    Slider(
+                        value = settings.offsetY.toFloat(),
+                        onValueChange = { settingsManager.updateOffsetY(it.toInt()) },
+                        valueRange = -80f..80f,
+                        steps = 15,
+                        colors = SliderDefaults.colors(thumbColor = NeonCyan, activeTrackColor = NeonCyan)
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-private fun GestureToggleRow(
+private fun SettingToggleRow(
     label: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
@@ -795,14 +965,14 @@ private fun SafetyNoteCard() {
             Spacer(modifier = Modifier.width(12.dp))
             Column {
                 Text(
-                    text = "Notice: Device May Get Warm",
+                    text = "Battery & Thermal Efficiency",
                     fontWeight = FontWeight.Bold,
                     fontSize = 13.sp,
                     color = NeonAmber
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = "Continuous neural net hand tracking utilizes GPU/NPU on-device. Choosing 15 or 20 FPS saves battery and keeps temperatures cooler.",
+                    text = "Haatix V2 uses GPU acceleration and drops to 8 FPS during idle periods when no hand is in view to save power and prevent device warming.",
                     fontSize = 11.5.sp,
                     color = TextSecondary,
                     lineHeight = 16.sp

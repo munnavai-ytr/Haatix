@@ -7,7 +7,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -19,12 +18,14 @@ import com.example.data.SettingsManager
 import com.example.service.GestureService
 import com.example.ui.screens.GuideScreen
 import com.example.ui.screens.HomeScreen
+import com.example.ui.screens.PracticeScreen
 import com.example.ui.screens.PrivacyScreen
 import com.example.ui.theme.DarkNavyBackground
 import com.example.ui.theme.MyApplicationTheme
 
 enum class Screen {
     HOME,
+    PRACTICE,
     GUIDE,
     PRIVACY
 }
@@ -60,8 +61,14 @@ class MainActivity : ComponentActivity() {
                     when (currentScreen) {
                         Screen.HOME -> {
                             HomeScreen(
+                                onNavigateToPractice = { currentScreen = Screen.PRACTICE },
                                 onNavigateToGuide = { currentScreen = Screen.GUIDE },
                                 onNavigateToPrivacy = { currentScreen = Screen.PRIVACY }
+                            )
+                        }
+                        Screen.PRACTICE -> {
+                            PracticeScreen(
+                                onBackClick = { currentScreen = Screen.HOME }
                             )
                         }
                         Screen.GUIDE -> {

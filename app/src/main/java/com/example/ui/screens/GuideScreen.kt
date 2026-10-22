@@ -19,11 +19,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lightbulb
-import androidx.compose.material.icons.filled.Security
-import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,7 +36,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -68,7 +65,7 @@ fun GuideScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "User Guide (ব্যবহার নির্দেশিকা)",
+                        text = "Haatix Guide (ব্যবহার নির্দেশিকা)",
                         fontWeight = FontWeight.Bold,
                         color = TextPrimary
                     )
@@ -99,124 +96,148 @@ fun GuideScreen(
             item {
                 Spacer(modifier = Modifier.height(4.dp))
                 SectionHeader(
-                    title = "How to Use (কিভাবে ব্যবহার করবেন)",
-                    subtitle = "সহজ ৩টি ধাপে এয়ারটাচ চালু করুন"
+                    title = "Best Position (হাত রাখার সঠিক নিয়ম)",
+                    subtitle = "সহজে ও নিখুঁতভাবে নিয়ন্ত্রণের কৌশল"
                 )
             }
 
-            // Step 1: Setup & Restricted Settings
             item {
                 SetupStepCard(
                     stepNumber = "১",
-                    title = "Setup Permissions (অনুমতি সেটআপ)",
-                    bengaliDesc = "হোমপেজের চেকলিস্ট থেকে Camera, Overlay এবং Accessibility অন করুন। Android 13 বা তার নতুন ফোনে Accessibility অপশনটি ধূসর (Greyed out) থাকলে: Settings > Apps > AirTouch > উপরের ৩টি ডটে ট্যাপ করে 'Allow restricted settings' সিলেক্ট করুন।"
+                    title = "Distance & Light (দূরত্ব ও আলো)",
+                    bengaliDesc = "ফোনটি মুখ ও হাত থেকে ৩০-৪০ সেমি (30-40 cm) দূরে রাখুন। পর্যাপ্ত আলোতে ব্যবহার করুন যাতে সামনের ক্যামেরা পুরো হাতটি স্পষ্ট দেখতে পারে।"
                 )
             }
 
-            // Step 2: Press Start
             item {
                 SetupStepCard(
                     stepNumber = "২",
-                    title = "Press Start (সার্ভিস চালু করুন)",
-                    bengaliDesc = "হোম স্ক্রিনের বড় 'START AIRTOUCH' বাটনে ট্যাপ করুন। স্ক্রিনের উপরে একটি সাইয়ান (Cyan) রঙের হোলোগ্রাম কার্সর দেখা যাবে।"
+                    title = "Hand in Frame (হাত ক্যামেরার মাঝে রাখুন)",
+                    bengaliDesc = "হাতের কবজি ও সব আঙ্গুল যেন ক্যামেরার ফ্রেমে থাকে। স্ক্রিনের রিং-এর নিচে কোনো সতর্কবার্তা (যেমন: 'Bring hand closer' বা 'Keep full hand in view') এলে সে অনুযায়ী হাত ঠিক করুন।"
                 )
             }
 
-            // Step 3: Positioning
             item {
                 SetupStepCard(
                     stepNumber = "৩",
-                    title = "Hand Position (হাত রাখার সঠিক নিয়ম)",
-                    bengaliDesc = "ফোনটিকে সামনের ক্যামেরার দিকে ৩০-৪০ সেন্টিমিটার (30-40 cm) দূরত্বে রাখুন। রুমের আলো পর্যাপ্ত রাখুন যাতে পুরো হাতটি ক্যামেরার ফ্রেমে পরিষ্কার দেখা যায়।"
+                    title = "Android 13+ Restricted Settings",
+                    bengaliDesc = "যদি Accessibility সার্ভিস ধূসর বা অফ থাকে: Settings > Apps > Haatix > উপরের ৩টি ডটে ট্যাপ করে 'Allow restricted settings' সিলেক্ট করে পাসওয়ার্ড বা ফিঙ্গারপ্রিন্ট দিয়ে আনলক করুন।"
                 )
             }
 
-            // Gesture Controls Section
+            // Gesture Cards
             item {
                 Spacer(modifier = Modifier.height(12.dp))
                 SectionHeader(
                     title = "How to Control in Your Hand (হাত দিয়ে নিয়ন্ত্রণ)",
-                    subtitle = "প্রতিটি অঙ্গভঙ্গি (Gesture) এর নিয়ম ও কাজ"
+                    subtitle = "Haatix V2 অঙ্গভঙ্গি (Gestures)"
                 )
             }
 
-            // Gesture 1: Move Cursor
+            // Move
             item {
                 GestureCard(
                     title = "Cursor Movement (কার্সর নাড়ানো)",
-                    englishLabel = "Move Open Palm",
-                    bengaliDesc = "আপনার হাতের তালু (Open Palm) সামনের ক্যামেরার সামনে ডানে, বায়ে, উপরে বা নিচে নাড়ালে কার্সরটি স্ক্রিনের সেই স্থানে চলে যাবে। কার্সর হাতের তালুর কেন্দ্র অনুসারে সরে, তাই আঙ্গুল বাঁকা করলেও কার্সর লাফাবে না।",
+                    englishLabel = "Move Palm Center",
+                    bengaliDesc = "হাতের তালু ডানে, বাঁয়ে, উপরে বা নিচে সরান। কার্সর তালুর কেন্দ্র অনুসরণ করে, তাই ক্লিক বা পিঞ্চ করার সময় কার্সর কাঁপবে না বা লক্ষ্য থেকে সরবে না।",
                     illustration = { MoveIllustration(size = 90.dp) }
                 )
             }
 
-            // Gesture 2: Pinch = Tap
+            // Click
             item {
                 GestureCard(
-                    title = "Touch / Click (ট্যাপ বা ক্লিক)",
-                    englishLabel = "Pinch (Thumb + Index)",
-                    bengaliDesc = "কার্সরটি যে বাটনে নিতে চান সেখানে নিয়ে বৃদ্ধাঙ্গুল ও তর্জনী একসাথে জোড়া দিয়ে পিঞ্চ (Pinch) করুন। সাথে সাথে স্ক্রিনে ক্লিক বা ট্যাপ হয়ে যাবে।",
+                    title = "Click / Tap (ক্লিক বা ট্যাপ)",
+                    englishLabel = "Quick Pinch (Thumb + Index) & Release",
+                    bengaliDesc = "কার্সরটি কাঙ্ক্ষিত বাটনে নিয়ে বৃদ্ধাঙ্গুল ও তর্জনী একসাথে লাগিয়ে সাথে সাথে ছেড়ে দিন (Release)। কার্সরটি ঠিক স্থানে লক হয়ে মাউসের মতো নিখুঁত ক্লিক করবে।",
                     illustration = { PinchTapIllustration(size = 90.dp) }
                 )
             }
 
-            // Gesture 3: Scroll
+            // Drag
             item {
                 GestureCard(
-                    title = "Page Scroll (পৃষ্ঠা স্ক্রোল)",
-                    englishLabel = "Palm Swipe Up / Down",
-                    bengaliDesc = "সোজা খোলা তালু দ্রুত উপরের দিকে তুললে নিচে স্ক্রোল হবে (Swipe Up), এবং দ্রুত নিচের দিকে নামালে উপরে স্ক্রোল হবে (Swipe Down)। ফেসবুক বা ব্রাউজিংয়ে এটি অত্যন্ত কার্যকর।",
+                    title = "Finger Drag (টেনে সরানো বা ড্র্যাগ)",
+                    englishLabel = "Pinch & Hold for 350ms, then Move",
+                    bengaliDesc = "বৃদ্ধাঙ্গুল ও তর্জনী জোড়া লাগিয়ে ০.৩৫ সেকেন্ড ধরে রাখুন (হালকা ভাইব্রেশন হবে)। এরপর হাত সরিয়ে হোম পেজ সোয়াইপ, অ্যাপ ড্রয়ার বা স্লাইডার টেনে সরান। আঙ্গুল খুললে ড্রপ হবে।",
+                    illustration = { PinchTapIllustration(size = 90.dp) }
+                )
+            }
+
+            // Wave Flick
+            item {
+                GestureCard(
+                    title = "Wave Scroll / Flick (ঝটিকা সোয়াইপ)",
+                    englishLabel = "Open Palm Quick Wave (Up/Down/Left/Right)",
+                    bengaliDesc = "খোলা হাত দ্রুত উপরে/নিচে নাড়ালে পৃষ্ঠা স্ক্রোল হবে, এবং ডানে/বাঁয়ে নাড়ালে হোম স্ক্রিনের পৃষ্ঠা বদলাবে। ফিরতি হাত নামানোর সময় ভুল স্ক্রোল প্রতিরোধ ব্যবস্থা রয়েছে।",
                     illustration = { ScrollIllustration(size = 90.dp) }
                 )
             }
 
-            // Gesture 4: Fist = Back
+            // Two Finger Scroll
             item {
                 GestureCard(
-                    title = "Back Button (পিছনে যাওয়া)",
-                    englishLabel = "Hold Closed Fist for 0.7s",
-                    bengaliDesc = "হাত দিয়ে একটি শক্ত মুঠি (Fist) করে ০.৭ সেকেন্ড ধরে রাখুন। সাথে সাথে ব্যাক বাটন (Android Back Action) কাজ করবে।",
+                    title = "Continuous Scroll (অনবরত স্ক্রোল)",
+                    englishLabel = "Two Fingers (V-Sign) Up / Down",
+                    bengaliDesc = "ল্যাপটপের টাচপ্যাডের মতো তর্জনী ও মধ্যমা আঙ্গুল (V সাইন) তুলে হাত উপরে বা নিচে সরান। হাত যত দূরে সরাবেন তত দ্রুত স্ক্রোল হবে। হাত মাঝে রাখলে স্ক্রোল থেমে যাবে।",
+                    illustration = { ScrollIllustration(size = 90.dp) }
+                )
+            }
+
+            // Fist Back
+            item {
+                GestureCard(
+                    title = "Back Action (পিছনে যাওয়া)",
+                    englishLabel = "Hold Fist for 0.5s & Open",
+                    bengaliDesc = "হাত শক্ত মুঠি (Fist) করে ০.৫ সেকেন্ড ধরে রাখুন (সবুজ বৃত্ত দেখা যাবে), তারপর হাত খুলুন। তাৎক্ষণিকভাবে ব্যাক বাটন (Back Action) কাজ করবে।",
                     illustration = { FistBackIllustration(size = 90.dp) }
                 )
             }
 
-            // Gesture 5: Hold Palm 2s = Pause / Resume
+            // Fist Pause
             item {
                 GestureCard(
-                    title = "Safety Pause (সাময়িক বিরতি)",
-                    englishLabel = "Hold Open Palm Still for 2s",
-                    bengaliDesc = "ভিডিও দেখার সময় বা ভুল টাচ এড়াতে খোলা হাত ২ সেকেন্ড স্থির ধরে রাখুন। কার্সর অ্যাম্বার (হলুদ) রঙে পজ (Paused) হয়ে যাবে। পুনরায় চালু করতে আবার হাত ২ সেকেন্ড স্থির রাখুন।",
+                    title = "Pause / Resume (সাময়িক বিরতি)",
+                    englishLabel = "Hold Fist for 1.5s",
+                    bengaliDesc = "ভিডিও দেখার সময় বা হাত বিশ্রাম দিতে মুঠি করে ১.৫ সেকেন্ড ধরে রাখুন (হলুদ বৃত্ত পূর্ণ হবে ও ভাইব্রেশন হবে)। আবার চালু করতে একই নিয়মে মুঠি ১.৫ সেকেন্ড ধরে রাখুন।",
                     illustration = { PauseResumeIllustration(size = 90.dp) }
                 )
             }
 
-            // Troubleshooting Section
+            // Troubleshooting
             item {
                 Spacer(modifier = Modifier.height(12.dp))
                 SectionHeader(
                     title = "Troubleshooting (সমস্যা ও সমাধান)",
-                    subtitle = "কোনো অসুবিধা হলে নিচের সমাধানগুলো দেখুন"
+                    subtitle = "সহজে সমাধান করুন"
                 )
             }
 
             item {
                 TroubleshootCard(
-                    title = "Cursor is Shaky (কার্সর বেশি কাঁপলে)",
-                    desc = "হোম স্ক্রিনের Settings-এ গিয়ে 'Cursor Smoothing' কিছুটা বাড়িয়ে নিন। এছাড়াও রুমের আলো উজ্জ্বল রাখুন এবং হাত বেশি দ্রুত নাড়াবেন না।"
+                    title = "Cursor is Shaky (কার্সর কাঁপলে)",
+                    desc = "হোম পেজের Settings-এ 'Cursor Smoothness' বাড়ান। হাত ক্যামেরার বেশি কাছে রাখবেন না এবং ভালো আলো ব্যবহার করুন।"
+                )
+            }
+
+            item {
+                TroubleshootCard(
+                    title = "Click Missing Target (ক্লিক লক্ষ্য মিস করলে)",
+                    desc = "Settings-এর Advanced Calibration অপশন থেকে Offset X এবং Offset Y সামঞ্জস্য করে আপনার হাত ও দৃষ্টির সাথে রিং-এর স্থান ক্যালিব্রেট করুন।"
                 )
             }
 
             item {
                 TroubleshootCard(
                     title = "Phone Gets Warm (ফোন গরম হলে)",
-                    desc = "AI ভিশন মডেল ক্রমাগত ক্যামেরার ফ্রেম বিশ্লেষণ করে বলে কিছুটা গরম হওয়া স্বাভাবিক। কম তাপমাত্রার জন্য Settings থেকে ক্যামেরা FPS '15 FPS' বা '20 FPS' নির্বাচন করুন।"
+                    desc = "কম্পিউটার ভিশন প্রসেসিং এর কারণে ফোন কিছুটা উষ্ণ হওয়া স্বাভাবিক। ব্যাটারি সাশ্রয় করতে Settings থেকে Performance Mode 'Power Saver' বা 'Auto' নির্বাচন করুন।"
                 )
             }
 
             item {
                 TroubleshootCard(
-                    title = "Service Stops Unexpectedly (সার্ভিস বন্ধ হয়ে গেলে)",
-                    desc = "ফোনের ব্যাটারি অপটিমাইজেশন সেটিংস থেকে AirTouch অ্যাপের ব্যাটারি 'Unrestricted' বা 'No restrictions' করুন, যাতে ব্যাকগ্রাউন্ডে অ্যান্ড্রয়েড সিস্টেম সার্ভিস বন্ধ না করে।"
+                    title = "Service Stops Unexpectedly (সার্ভিস বন্ধ হলে)",
+                    desc = "ফোনের ব্যাটারি অপটিমাইজেশন সেটিংসে গিয়ে Haatix অ্যাপের ব্যাটারি 'Unrestricted' বা 'No restrictions' করুন।"
                 )
             }
 

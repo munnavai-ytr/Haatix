@@ -16,7 +16,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.NoPhotography
 import androidx.compose.material.icons.filled.PublicOff
@@ -58,7 +57,7 @@ fun PrivacyScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Privacy & Security Policy",
+                        text = "Haatix Privacy Policy",
                         fontWeight = FontWeight.Bold,
                         color = TextPrimary
                     )
@@ -95,7 +94,7 @@ fun PrivacyScreen(
                 PrivacyItemCard(
                     icon = Icons.Default.PublicOff,
                     title = "100% Offline — No Internet Permission",
-                    desc = "AirTouch declares NO internet permission in its AndroidManifest. It is technically impossible for any data, images, or telemetry to be transmitted from this application to any external server or cloud service."
+                    desc = "Haatix declares NO internet permission in its AndroidManifest. It is technically impossible for any video frame, gesture data, or telemetry to be transmitted from this device to any cloud or remote server."
                 )
             }
 
@@ -111,7 +110,7 @@ fun PrivacyScreen(
                 PrivacyItemCard(
                     icon = Icons.Default.TouchApp,
                     title = "Accessibility Dispatch Only",
-                    desc = "The Accessibility Service is strictly configured with canRetrieveWindowContent=\"false\". AirTouch CANNOT and DOES NOT inspect, read, or harvest screen contents, text, passwords, or personal messages. It only uses dispatchGesture() to simulate touch taps, scrolls, and the system Back action on your behalf."
+                    desc = "The Accessibility Service is strictly configured with canRetrieveWindowContent=\"false\". Haatix CANNOT and DOES NOT inspect, read, or harvest screen contents, text, passwords, or personal messages. It only uses dispatchGesture() to simulate touch taps, scrolls, and the system Back action on your behalf."
                 )
             }
 
@@ -151,7 +150,7 @@ private fun PrivacyHighlightBanner() {
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
-                    text = "Zero-Cloud Guarantee",
+                    text = "Zero-Cloud Privacy Guarantee",
                     color = NeonTeal,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
@@ -159,7 +158,7 @@ private fun PrivacyHighlightBanner() {
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Everything in AirTouch happens entirely inside your device's memory. Your privacy and security are mathematically protected by zero-network capability.",
+                text = "Everything in Haatix happens entirely inside your device's memory. Your privacy and security are mathematically protected by zero-network capability.",
                 color = TextSecondary,
                 fontSize = 13.sp,
                 lineHeight = 19.sp

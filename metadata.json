@@ -1,6 +1,6 @@
 {
-  "name": "AirTouch",
-  "description": "On-device AI hand gesture controller using front camera to navigate and interact with your phone touch-free.",
+  "name": "Haatix",
+  "description": "On-device AI hand gesture phone controller using front camera to navigate and interact with your phone like a real finger touch.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

@@ -2,12 +2,10 @@ package com.example
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import com.example.data.AirTouchSettings
-import com.example.engine.GestureAction
+import com.example.data.HaatixSettings
+import com.example.engine.ActionSink
 import com.example.engine.GestureEngine
-import com.example.engine.Point3D
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,41 +20,83 @@ class ExampleRobolectricTest {
     fun `read string from context`() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val appName = context.getString(R.string.app_name)
-        assertEquals("AirTouch", appName)
+        assertEquals("Haatix", appName)
     }
 
     @Test
-    fun `gesture engine computes palm center and detects pinch`() {
-        val engine = GestureEngine()
-        val settings = AirTouchSettings(
-            sensitivity = 1.0f,
-            smoothing = 0.5f,
-            pinchTapEnabled = true
+    fun `gesture engine computes palm center and dispatches tap on release`() {
+        var tapDispatched = false
+        var tappedX = 0f
+        var tappedY = 0f
+
+        val testSink = object : ActionSink {
+            override fun tap(x: Float, y: Float) {
+                tapDispatched = true
+                tappedX = x
+                tappedY = y
+            }
+            override fun swipe(x1: Float, y1: Float, x2: Float, y2: Float, ms: Long) {}
+            override fun dragStart(x: Float, y: Float) {}
+            override fun dragMove(x: Float, y: Float) {}
+            override fun dragEnd() {}
+            override fun back() {}
+            override fun pauseChanged(paused: Boolean) {}
+            override fun haptic(ms: Int) {}
+        }
+
+        val engine = GestureEngine(testSink)
+        val settings = HaatixSettings(
+            cursorSpeed = 1.0f,
+            smoothness = 0.5f,
+            pinchClickEnabled = true
         )
 
-        // Create 21 landmarks where thumb tip (4) and index tip (8) are pinched close together
-        // and middle, ring, pinky are extended so it is not a fist
-        val landmarks = MutableList(21) { Point3D(0.5f, 0.5f, 0f) }
-        landmarks[0] = Point3D(0.5f, 0.7f, 0f)   // wrist
-        landmarks[5] = Point3D(0.48f, 0.5f, 0f)  // index MCP
-        landmarks[9] = Point3D(0.52f, 0.5f, 0f)  // middle MCP (palm size = 0.2)
-        landmarks[13] = Point3D(0.55f, 0.5f, 0f) // ring MCP
-        landmarks[17] = Point3D(0.58f, 0.5f, 0f) // pinky MCP
+        // FloatArray(63) for 21 points
+        val landmarks = FloatArray(63) { 0.5f }
+        // Wrist (0)
+        landmarks[0] = 0.5f
+        landmarks[1] = 0.7f
 
-        landmarks[4] = Point3D(0.49f, 0.45f, 0f) // thumb tip
-        landmarks[8] = Point3D(0.50f, 0.45f, 0f) // index tip (very close to thumb = pinch)
-        landmarks[12] = Point3D(0.52f, 0.25f, 0f) // middle tip extended
-        landmarks[16] = Point3D(0.55f, 0.25f, 0f) // ring tip extended
-        landmarks[20] = Point3D(0.58f, 0.28f, 0f) // pinky tip extended
+        // Middle MCP (9) -> index 9*3 = 27, 28
+        landmarks[27] = 0.5f
+        landmarks[28] = 0.5f
 
-        // Process frame 1 at t=1000ms
-        val state1 = engine.process(landmarks, 1080, 2400, settings, 1000L)
-        assertTrue(state1.isHandDetected)
-        assertTrue(state1.isPinching)
+        // Middle tip (12) extended
+        landmarks[36] = 0.5f
+        landmarks[37] = 0.2f
 
-        // Process frame 2 at t=1200ms (>150ms debounce)
-        val state2 = engine.process(landmarks, 1080, 2400, settings, 1200L)
-        assertNotNull(state2.triggeredAction)
-        assertTrue(state2.triggeredAction is GestureAction.Tap)
+        // Ring tip (16) extended
+        landmarks[48] = 0.55f
+        landmarks[49] = 0.2f
+
+        // Pinky tip (20) extended
+        landmarks[60] = 0.58f
+        landmarks[61] = 0.2f
+
+        // Thumb tip (4: 12, 13) and Index tip (8: 24, 25) close together (pinch)
+        landmarks[12] = 0.49f
+        landmarks[13] = 0.45f
+        landmarks[24] = 0.50f
+        landmarks[25] = 0.45f
+
+        // Frame 1: Approach pinch (t = 1000ms)
+        engine.processFrame(landmarks, true, settings, 1000L)
+        assertTrue(engine.hasHand)
+
+        // Frame 2: Closed pinch frame 1 (t = 1040ms)
+        engine.processFrame(landmarks, true, settings, 1040L)
+
+        // Frame 3: Closed pinch frame 2 (t = 1080ms)
+        engine.processFrame(landmarks, true, settings, 1080L)
+
+        // Frame 4: Release pinch (t = 1200ms, closed duration = 120ms)
+        landmarks[12] = 0.35f // thumb opened away
+        landmarks[24] = 0.60f // index opened away
+        engine.processFrame(landmarks, true, settings, 1200L)
+
+        // Verify tap was dispatched at anchor
+        assertTrue(tapDispatched)
+        assertTrue(tappedX > 0f)
+        assertTrue(tappedY > 0f)
     }
 }
